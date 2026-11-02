@@ -1,0 +1,225 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório Pedagógico Oficial - {{ offering.teacher.user.get_full_name }} | SENAI</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+  <style>
+    body {
+      background: #ffffff;
+      color: #09090b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .report-sheet {
+      max-width: 860px;
+      margin: 1.5rem auto;
+      padding: 2.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+    @media print {
+      .report-sheet {
+        border: none;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Print Controls (Hidden on print) -->
+  <div class="no-print" style="background: #0f172a; color: #ffffff; padding: 0.75rem; text-align: center; position: sticky; top: 0; z-index: 1000;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 1rem;">
+      <span>Visualização de Impressão Oficial do Parecer Docente</span>
+      <button onclick="window.print()" class="btn btn-senai btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir ou Salvar em PDF
+      </button>
+      <button onclick="window.close()" class="btn btn-secondary btn-sm">Fechar Janela</button>
+    </div>
+  </div>
+
+  <div class="report-sheet">
+    
+    <!-- Institutional Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #09090b; padding-bottom: 1.5rem; margin-bottom: 2rem;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <span class="brand-badge" style="font-size: 0.875rem; padding: 0.2rem 0.6rem;">SENAI</span>
+          <strong style="font-size: 1.25rem;">SERVIÇO NACIONAL DE APRENDIZAGEM INDUSTRIAL</strong>
+        </div>
+        <div style="font-size: 0.9375rem; font-weight: 600; color: #334155;">
+          Escola SENAI Morvan Figueiredo &bull; São Paulo / SP
+        </div>
+        <div style="font-size: 0.8125rem; color: #64748b;">
+          Coordenação de Educação Profissional &bull; Setor Pedagógico
+        </div>
+      </div>
+
+      <div style="text-align: right;">
+        <span class="badge badge-neutral" style="font-size: 0.75rem;">RELATÓRIO INSTITUCIONAL</span>
+        <div class="mono" style="font-size: 0.75rem; color: #64748b; margin-top: 0.35rem;">
+          EMISSÃO: {% now "d/m/Y H:i" %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Title & Identification Table -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h2 style="font-size: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em;">
+        Parecer de Avaliação Docente Institucional
+      </h2>
+      <div class="mono" style="font-size: 0.875rem; color: #64748b; margin-top: 0.25rem;">
+        Ciclo: {{ cycle.title }} &bull; Período Letivo: {{ offering.academic_period }}
+      </div>
+    </div>
+
+    <!-- Details Box -->
+    <div style="background: var(--bg-muted); border: 1px solid var(--border-color); border-radius: 6px; padding: 1.25rem; margin-bottom: 2rem;">
+      <div class="grid-2" style="gap: 1rem; font-size: 0.875rem;">
+        <div>
+          <span style="color: #64748b;">Docente Avaliado(a):</span><br>
+          <strong style="font-size: 1rem;">{{ offering.teacher.get_academic_title_display }} {{ offering.teacher.user.get_full_name }}</strong>
+        </div>
+        <div>
+          <span style="color: #64748b;">Unidade Curricular:</span><br>
+          <strong style="font-size: 1rem;">{{ offering.discipline.name }} ({{ offering.discipline.code }})</strong>
+        </div>
+        <div>
+          <span style="color: #64748b;">Curso / Turma:</span><br>
+          <strong>{{ offering.class_group.course.name }} &bull; {{ offering.class_group.name }}</strong>
+        </div>
+        <div>
+          <span style="color: #64748b;">Carga Horária / Turno:</span><br>
+          <strong>{{ offering.discipline.workload_hours }}h &bull; Turno {{ offering.class_group.get_shift_display }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Summary Cards -->
+    <div class="grid-4" style="margin-bottom: 2rem;">
+      <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Média Geral</span>
+        <div style="font-size: 2rem; font-weight: 800; color: #16a34a; line-height: 1.2; margin-top: 0.25rem;">
+          {{ avg_score|floatformat:2 }}
+        </div>
+        <span style="font-size: 0.6875rem; color: #64748b;">Escala de 1 a 5</span>
+      </div>
+
+      <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Amostragem</span>
+        <div style="font-size: 2rem; font-weight: 800; color: #09090b; line-height: 1.2; margin-top: 0.25rem;">
+          {{ response_count }}
+        </div>
+        <span style="font-size: 0.6875rem; color: #64748b;">Respostas computadas</span>
+      </div>
+
+      <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Taxa de Adesão</span>
+        <div style="font-size: 2rem; font-weight: 800; color: #0284c7; line-height: 1.2; margin-top: 0.25rem;">
+          {{ participation_rate }}%
+        </div>
+        <span style="font-size: 0.6875rem; color: #64748b;">Alunos da turma</span>
+      </div>
+
+      <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Grau de Sigilo</span>
+        <div style="font-size: 2rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin-top: 0.25rem;">
+          100%
+        </div>
+        <span style="font-size: 0.6875rem; color: #64748b;">Zero-Link Anônimo</span>
+      </div>
+    </div>
+
+    <!-- Performance Table by Dimension -->
+    <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+      1. Desempenho Discriminado por Dimensão Pedagógica
+    </h3>
+
+    <table class="table" style="margin-bottom: 2.5rem; font-size: 0.875rem;">
+      <thead>
+        <tr>
+          <th>Dimensão</th>
+          <th style="text-align: center;">Média (1 a 5)</th>
+          <th>Aproveitamento (%)</th>
+          <th>Avaliação Conceitual</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dim in dimension_stats %}
+          <tr>
+            <td>
+              <strong>{{ dim.name }}</strong>
+              <div style="font-size: 0.75rem; color: #64748b;">{{ dim.description }}</div>
+            </td>
+            <td class="mono" style="text-align: center; font-weight: 700; font-size: 1rem;">
+              {{ dim.avg_score|floatformat:2 }}
+            </td>
+            <td>
+              <div style="height: 6px; width: 100%; background: #e2e8f0; border-radius: 9999px; overflow: hidden; margin-top: 4px;">
+                <div style="height: 100%; width: {{ dim.percent }}%; background: #0f172a;"></div>
+              </div>
+            </td>
+            <td>
+              {% if dim.avg_score >= 4.5 %}
+                <span style="color: #16a34a; font-weight: 600;">Excelente</span>
+              {% elif dim.avg_score >= 4.0 %}
+                <span style="color: #2563eb; font-weight: 600;">Bom</span>
+              {% elif dim.avg_score >= 3.0 %}
+                <span style="color: #d97706; font-weight: 600;">Regular</span>
+              {% else %}
+                <span style="color: #dc2626; font-weight: 600;">Crítico</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Qualitative Feedbacks -->
+    <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+      2. Síntese dos Comentários dos Estudantes (Aprovados na Moderação)
+    </h3>
+
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 3rem;">
+      {% for c in approved_comments %}
+        <div style="background: #f8fafc; border-left: 3px solid #dc2626; padding: 0.75rem 1rem; border-radius: 4px; font-size: 0.875rem;">
+          <span style="font-style: italic; color: #1e293b;">"{{ c.comment }}"</span>
+        </div>
+      {% empty %}
+        <p style="font-size: 0.875rem; color: #64748b;">Nenhum comentário adicional registrado para esta oferta.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Signatures Block for Official Archiving -->
+    <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px dashed #cbd5e1; page-break-inside: avoid;">
+      <div class="grid-2" style="gap: 4rem; text-align: center;">
+        <div>
+          <div style="border-top: 1px solid #09090b; width: 80%; margin: 0 auto 0.5rem;"></div>
+          <strong style="font-size: 0.875rem;">{{ offering.teacher.user.get_full_name }}</strong><br>
+          <span style="font-size: 0.75rem; color: #64748b;">Docente Avaliado(a)</span>
+        </div>
+
+        <div>
+          <div style="border-top: 1px solid #09090b; width: 80%; margin: 0 auto 0.5rem;"></div>
+          <strong style="font-size: 0.875rem;">Coordenação Pedagógica</strong><br>
+          <span style="font-size: 0.75rem; color: #64748b;">Escola SENAI Morvan Figueiredo</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

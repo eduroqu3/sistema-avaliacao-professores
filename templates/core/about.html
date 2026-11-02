@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Arquitetura & Segurança{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px;">
+  
+  <div style="margin-bottom: 2.5rem;">
+    <span class="badge badge-info">Documentação de Engenharia</span>
+    <h1 style="margin-top: 0.5rem; font-size: 2.5rem;">Arquitetura, Anonimato & Segurança</h1>
+    <p style="font-size: 1.125rem; color: #475569; margin-top: 0.5rem;">
+      Como o Avalia SENAI assegura a integridade pedagógica e o sigilo matemático absoluto para os estudantes da Escola SENAI Morvan Figueiredo.
+    </p>
+  </div>
+
+  <!-- Zero Link Architecture Card -->
+  <div class="card" style="margin-bottom: 2.5rem;">
+    <div class="card-header">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 40px; height: 40px; border-radius: 8px; background: #0f172a; color: #ffffff; display: flex; align-items: center; justify-content: center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div>
+          <h3 style="font-size: 1.35rem;">O Protocolo de Anonimato Desacoplado (Zero-Link)</h3>
+          <span style="font-size: 0.8125rem; color: #64748b;">Isolamento Físico e Lógico entre Autenticação e Resposta</span>
+        </div>
+      </div>
+    </div>
+
+    <p style="margin-bottom: 1.25rem;">
+      O maior desafio em sistemas de avaliação educacional é eliminar o receio dos estudantes de sofrerem retaliações ou represálias em suas notas caso emitam feedbacks críticos sinceros. Sistemas tradicionais que apenas ocultam o nome do aluno na tela mantêm o <code>aluno_id</code> registrado no banco de dados, permitindo que administradores ou relatórios técnicos descubram a autoria.
+    </p>
+
+    <div style="background: var(--bg-muted); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
+      <h4 style="margin-bottom: 0.75rem; font-size: 1rem; color: #09090b;">Estrutura Relacional no Supabase / PostgreSQL:</h4>
+      
+      <div class="grid-2" style="gap: 1.5rem;">
+        <div style="background: #ffffff; padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid #0284c7;">
+          <strong style="color: #0369a1; display: block; margin-bottom: 0.25rem;">Tabela 1: EvaluationReceipt</strong>
+          <span style="font-size: 0.8125rem; color: #64748b; display: block; margin-bottom: 0.5rem;">Comprovante de Cumprimento Acadêmico</span>
+          <p style="font-size: 0.8125rem; margin: 0;">
+            Armazena: <code>student_id</code>, <code>offering_id</code>, <code>cycle_id</code>, <code>receipt_hash</code>.<br>
+            <strong>Objetivo:</strong> Impedir que o mesmo estudante vote duas vezes e emitir o recibo de participação.<br>
+            <strong style="color: #dc2626;">ATENÇÃO:</strong> Esta tabela NÃO contém nenhuma nota, comentário, ID de resposta ou ponteiro para a resposta!
+          </p>
+        </div>
+
+        <div style="background: #ffffff; padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid #16a34a;">
+          <strong style="color: #15803d; display: block; margin-bottom: 0.25rem;">Tabela 2: EvaluationResponse</strong>
+          <span style="font-size: 0.8125rem; color: #64748b; display: block; margin-bottom: 0.5rem;">Dados Anonimizados da Avaliação</span>
+          <p style="font-size: 0.8125rem; margin: 0;">
+            Armazena: <code>offering_id</code>, <code>cycle_id</code>, <code>criteria_scores (JSONB)</code>, <code>overall_score</code>, <code>comment</code>.<br>
+            <strong>Objetivo:</strong> Alimentar os gráficos do Chart.js e médias dos docentes.<br>
+            <strong style="color: #16a34a;">GARANTIA:</strong> Não possui <code>student_id</code>, IP, User-Agent nem vínculo com o Recibo.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-success" style="margin-bottom: 0;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div>
+        <strong>Garantia Matemática Comprovável:</strong> Mesmo que um invasor ou administrador obtenha acesso total com privilégios de superusuário (root) ao banco de dados Supabase, é matematicamente impossível correlacionar qual linha de avaliação pertence a qual aluno.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech Stack Card -->
+  <div class="card" style="margin-bottom: 2.5rem;">
+    <h3 style="font-size: 1.35rem; margin-bottom: 1.25rem;">Stack Tecnológica Utilizada</h3>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Camada</th>
+            <th>Tecnologia</th>
+            <th>Finalidade no Projeto Avalia SENAI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Back-end</strong></td>
+            <td>Django 6.1 (Python 3.14)</td>
+            <td>Framework MVC/MTV robusto, arquitetura orientada a apps modulares e ORM seguro.</td>
+          </tr>
+          <tr>
+            <td><strong>Banco de Dados</strong></td>
+            <td>PostgreSQL 15/16 (Supabase) + SQLite local</td>
+            <td>Banco relacional de alta performance com suporte a JSONB, índices GIN e Row-Level Security.</td>
+          </tr>
+          <tr>
+            <td><strong>Front-end</strong></td>
+            <td>HTML5 Semântico, CSS Grid & Flexbox</td>
+            <td>Design System Manrope (DESIGN.md), responsividade completa sem excesso de dependências.</td>
+          </tr>
+          <tr>
+            <td><strong>Analytics & Gráficos</strong></td>
+            <td>Chart.js 4.4 + Django Data Endpoints</td>
+            <td>Gráficos de Radar de competências didáticas, histogramas de notas e comparações.</td>
+          </tr>
+          <tr>
+            <td><strong>Relatórios</strong></td>
+            <td>openpyxl & CSS Print Media</td>
+            <td>Exportação completa de dados em planilhas Excel (.xlsx) e layout de impressão institucional.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Identificação Institucional dos Alunos -->
+  <div class="card" style="background: #ffffff; border: 1.5px solid var(--accent-senai);">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-danger">Identificação do Projeto Acadêmico</span>
+        <h3 style="margin-top: 0.5rem; font-size: 1.35rem;">Escola SENAI Morvan Figueiredo</h3>
+      </div>
+      <div class="brand-badge">2025_DEV4_SESI</div>
+    </div>
+
+    <div style="margin-bottom: 1.5rem; font-size: 0.9375rem;">
+      <strong>Curso:</strong> Técnico em Desenvolvimento de Sistemas<br>
+      <strong>Professor Orientador:</strong> Johnny Braga de Oliveira<br>
+      <strong>Tema:</strong> TEMA-7 -- Sistema de Avaliação de Professores
+    </div>
+
+    <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">Estudantes Integrantes da Equipe:</h4>
+    <div class="grid-2">
+      {% for student in STUDENTS_TEAM %}
+        <div style="padding: 0.75rem 1rem; background: var(--bg-muted); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-weight: 600; color: #09090b;">{{ student }}</span>
+          <span class="mono" style="font-size: 0.75rem; color: #64748b;">Desenvolvedor FullStack</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+<<<<<<< HEAD
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+db.sqlite3-journal
+.env
+media/
+staticfiles/
+.DS_Store
+Thumbs.db
+=======
+*.py[cod]
+db.sqlite3
+.env
+staticfiles/
+>>>>>>> df73181025d511b4cfebb61908aad9e5724a56ef

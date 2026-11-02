@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Docente - {{ teacher_profile.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Header Card -->
+  <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #0f172a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">
+          {{ teacher_profile.user.first_name|slice:":1" }}{{ teacher_profile.user.last_name|slice:":1" }}
+        </div>
+        <div>
+          <span class="badge badge-warning">{{ teacher_profile.get_academic_title_display }}</span>
+          <h1 style="font-size: 1.75rem; margin-top: 0.25rem;">
+            {{ teacher_profile.user.get_full_name }}
+          </h1>
+          <div style="font-size: 0.875rem; color: #64748b;">
+            Departamento: <strong>{{ teacher_profile.department }}</strong> &bull; Registro Funcional: {{ teacher_profile.user.registration_number }}
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: right;">
+        <span class="badge badge-info">Ciclo {{ active_cycle.academic_period }}</span>
+        <div style="font-size: 0.8125rem; color: #64748b; margin-top: 0.25rem;">
+          {{ active_cycle.title }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards Grid -->
+  <div class="grid-4" style="margin-bottom: 2rem;">
+    <div class="card" style="text-align: center; border-left: 4px solid #16a34a;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Média Geral</div>
+      <div style="font-size: 2.25rem; font-weight: 800; color: #15803d; margin: 0.25rem 0;">
+        {{ overall_avg|floatformat:2 }}
+      </div>
+      <div style="font-size: 0.75rem; color: #16a34a; font-weight: 600;">Excelente Desempenho</div>
+    </div>
+
+    <div class="card" style="text-align: center; border-left: 4px solid #0284c7;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Total de Avaliações</div>
+      <div style="font-size: 2.25rem; font-weight: 800; color: #0369a1; margin: 0.25rem 0;">
+        {{ total_responses }}
+      </div>
+      <div style="font-size: 0.75rem; color: #64748b;">Respostas Computadas</div>
+    </div>
+
+    <div class="card" style="text-align: center; border-left: 4px solid #d97706;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Ponto Mais Forte</div>
+      <div style="font-size: 1.15rem; font-weight: 800; color: #b45309; margin: 0.5rem 0; min-height: 2.8rem; display: flex; align-items: center; justify-content: center;">
+        {{ best_dimension.name|default:"Didática e Metodologia" }}
+      </div>
+      <div style="font-size: 0.75rem; color: #b45309; font-weight: 600;">Nota: {{ best_dimension.score|floatformat:2 }} / 5.00</div>
+    </div>
+
+    <div class="card" style="text-align: center; border-left: 4px solid #8b5cf6;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Foco de Atenção</div>
+      <div style="font-size: 1.15rem; font-weight: 800; color: #6d28d9; margin: 0.5rem 0; min-height: 2.8rem; display: flex; align-items: center; justify-content: center;">
+        {{ attention_dimension.name|default:"Critérios de Feedback" }}
+      </div>
+      <div style="font-size: 0.75rem; color: #6d28d9; font-weight: 600;">Nota: {{ attention_dimension.score|floatformat:2 }} / 5.00</div>
+    </div>
+  </div>
+
+  <!-- Visual Analytics Section (Radar Chart & Distribution Bar Chart) -->
+  <div class="grid-2" style="margin-bottom: 2.5rem;">
+    <!-- Radar Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <span class="badge badge-neutral">Competências Didáticas</span>
+          <h3 style="font-size: 1.15rem; margin-top: 0.25rem;">Radar de Dimensões Pedagógicas</h3>
+        </div>
+      </div>
+      <div style="position: relative; height: 320px;">
+        <canvas id="teacherRadarChart" 
+                data-labels='{{ radar_labels_json|safe }}' 
+                data-scores='{{ radar_scores_json|safe }}'></canvas>
+      </div>
+    </div>
+
+    <!-- Rating Distribution Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <span class="badge badge-neutral">Histograma de Notas</span>
+          <h3 style="font-size: 1.15rem; margin-top: 0.25rem;">Distribuição das Avaliações (1 a 5)</h3>
+        </div>
+      </div>
+      <div style="position: relative; height: 320px;">
+        <canvas id="teacherBarChart" 
+                data-distribution='{{ distribution_json|safe }}'></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Dimension Scores Table -->
+  <div class="card" style="margin-bottom: 2.5rem;">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-info">Detalhamento Numérico</span>
+        <h3 style="font-size: 1.25rem; margin-top: 0.25rem;">Desempenho por Dimensão Avaliativa</h3>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ordem</th>
+            <th>Dimensão Avaliada</th>
+            <th>Média Obtida</th>
+            <th>Desempenho Visual</th>
+            <th>Classificação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dim in dimension_averages %}
+            <tr>
+              <td><strong>{{ dim.order }}</strong></td>
+              <td>
+                <div style="font-weight: 600;">{{ dim.name }}</div>
+                <div style="font-size: 0.75rem; color: #64748b;">{{ dim.description }}</div>
+              </td>
+              <td class="mono" style="font-weight: 700; font-size: 1.125rem;">{{ dim.avg_score|floatformat:2 }}</td>
+              <td style="width: 25%;">
+                <div style="height: 8px; width: 100%; background: #e2e8f0; border-radius: 9999px; overflow: hidden;">
+                  <div style="height: 100%; width: {{ dim.percent }}%; background: {% if dim.avg_score >= 4.5 %}#16a34a{% elif dim.avg_score >= 4.0 %}#2563eb{% elif dim.avg_score >= 3.0 %}#eab308{% else %}#ef4444{% endif %};"></div>
+                </div>
+              </td>
+              <td>
+                {% if dim.avg_score >= 4.5 %}
+                  <span class="badge badge-success">Excelente</span>
+                {% elif dim.avg_score >= 4.0 %}
+                  <span class="badge badge-info">Bom</span>
+                {% elif dim.avg_score >= 3.0 %}
+                  <span class="badge badge-warning">Regular</span>
+                {% else %}
+                  <span class="badge badge-danger">Crítico</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" style="text-align: center; color: #64748b;">Nenhuma dimensão registrada.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Approved Qualitative Feedbacks Section -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-success">Feedbacks dos Alunos</span>
+        <h3 style="font-size: 1.25rem; margin-top: 0.25rem;">Comentários Qualitativos Aprovados</h3>
+      </div>
+      <span style="font-size: 0.8125rem; color: #64748b;">Total: {{ approved_comments|length }} comentários</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% for resp in approved_comments %}
+        <div style="background: var(--bg-muted); border-left: 4px solid var(--accent-senai); padding: 1.25rem; border-radius: var(--radius-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge badge-neutral" style="font-size: 0.75rem;">Estudante Anônimo</span>
+              <span style="font-size: 0.8125rem; color: #64748b;">{{ resp.offering.class_group.name }} &bull; {{ resp.offering.discipline.name }}</span>
+            </div>
+            <div class="mono" style="font-size: 0.8125rem; font-weight: 700; color: #09090b;">
+              Nota Média: {{ resp.overall_score }}
+            </div>
+          </div>
+          <p style="font-size: 0.9375rem; color: #1e293b; font-style: italic; margin: 0;">
+            "{{ resp.comment }}"
+          </p>
+        </div>
+      {% empty %}
+        <div style="text-align: center; padding: 2rem; color: #64748b;">
+          Ainda não há comentários qualitativos aprovados pela moderação para este ciclo.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

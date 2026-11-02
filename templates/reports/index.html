@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Central de Relatórios{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Header Card -->
+  <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--accent-senai);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="badge badge-info">Gestão da Qualidade</span>
+        <h1 style="font-size: 2rem; margin-top: 0.35rem;">Central de Relatórios e Exportação</h1>
+        <p style="font-size: 0.9375rem; color: #64748b; margin-top: 0.25rem;">
+          Geração de relatórios comparativos, pareceres para conselho pedagógico e exportação de dados em planilhas Excel.
+        </p>
+      </div>
+
+      <div>
+        <a href="{% url 'reports:export_excel' active_cycle.id %}" class="btn btn-senai">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar Planilha Consolidada (.xlsx)
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Printable Reports by Offering -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-neutral">Documentos Oficiais</span>
+        <h3 style="font-size: 1.25rem; margin-top: 0.25rem;">Relatórios Individuais para Impressão / PDF</h3>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Docente</th>
+            <th>Unidade Curricular</th>
+            <th>Turma</th>
+            <th>Avaliações</th>
+            <th>Média Geral</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for off in offerings_summary %}
+            <tr>
+              <td>
+                <strong>{{ off.teacher.user.get_full_name }}</strong>
+                <div style="font-size: 0.75rem; color: #64748b;">{{ off.teacher.get_academic_title_display }}</div>
+              </td>
+              <td>{{ off.discipline.name }}</td>
+              <td><span class="badge badge-neutral">{{ off.class_group.name }}</span></td>
+              <td class="mono">{{ off.response_count }}</td>
+              <td class="mono" style="font-weight: 700; color: #16a34a;">{{ off.avg_score|floatformat:2 }}</td>
+              <td>
+                <a href="{% url 'reports:printable_report' off.id %}" class="btn btn-secondary btn-sm" target="_blank">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  Emitir Relatório
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" style="text-align: center; color: #64748b;">Nenhuma oferta encontrada para o ciclo atual.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Moderação Pedagógica de Comentários{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Header Card -->
+  <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--accent-senai);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="badge badge-warning">Coordenação Pedagógica</span>
+        <h1 style="font-size: 1.75rem; margin-top: 0.35rem;">Moderação de Feedbacks Qualitativos</h1>
+        <p style="font-size: 0.9375rem; color: #64748b; margin-top: 0.25rem;">
+          Garanta o respeito mútuo e a conformidade ética dos comentários livres submetidos pelos alunos antes da disponibilização aos professores.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="?status=ALL" class="btn btn-sm {% if current_filter == 'ALL' %}btn-primary{% else %}btn-secondary{% endif %}">Todos ({{ total_count }})</a>
+        <a href="?status=PENDING" class="btn btn-sm {% if current_filter == 'PENDING' %}btn-primary{% else %}btn-secondary{% endif %}">Pendentes ({{ pending_count }})</a>
+        <a href="?status=APPROVED" class="btn btn-sm {% if current_filter == 'APPROVED' %}btn-primary{% else %}btn-secondary{% endif %}">Aprovados ({{ approved_count }})</a>
+        <a href="?status=REJECTED" class="btn btn-sm {% if current_filter == 'REJECTED' %}btn-primary{% else %}btn-secondary{% endif %}">Rejeitados ({{ rejected_count }})</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments List -->
+  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    {% for resp in responses %}
+      <div class="card" style="border-left: 4px solid {% if resp.moderation_status == 'APPROVED' %}#16a34a{% elif resp.moderation_status == 'PENDING' %}#d97706{% else %}#dc2626{% endif %};">
+        
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span class="badge {% if resp.moderation_status == 'APPROVED' %}badge-success{% elif resp.moderation_status == 'PENDING' %}badge-warning{% else %}badge-danger{% endif %}">
+              {{ resp.get_moderation_status_display }}
+            </span>
+            <span style="font-size: 0.875rem; color: #475569;">
+              <strong>Docente:</strong> {{ resp.offering.teacher.user.get_full_name }} &bull; {{ resp.offering.discipline.name }} ({{ resp.offering.class_group.name }})
+            </span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="mono" style="font-size: 0.8125rem; color: #64748b;">
+              Nota Geral: <strong style="color: #09090b; font-size: 0.9375rem;">{{ resp.overall_score }}</strong> / 5.0
+            </div>
+            <span class="mono" style="font-size: 0.75rem; color: #94a3b8;">
+              {{ resp.submitted_at|date:"d/m/Y H:i" }}
+            </span>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-muted); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+          <p style="font-size: 0.9375rem; color: #1e293b; font-style: italic; margin: 0;">
+            "{{ resp.comment }}"
+          </p>
+        </div>
+
+        {% if resp.moderation_notes %}
+          <div style="font-size: 0.8125rem; color: #b91c1c; margin-bottom: 1rem;">
+            <strong>Motivo do Parecer:</strong> {{ resp.moderation_notes }} (Moderado por {{ resp.moderated_by.get_full_name|default:resp.moderated_by.username }})
+          </div>
+        {% endif %}
+
+        <!-- Moderation Action Form -->
+        <form method="post" action="{% url 'dashboards:moderation_action' resp.id %}" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          {% csrf_token %}
+          <input type="text" name="notes" placeholder="Justificativa da moderação (opcional)..." class="form-control" style="flex: 1; min-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8125rem;">
+          
+          <button type="submit" name="action" value="APPROVE" class="btn btn-secondary btn-sm" style="color: #15803d; border-color: #86efac;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Aprovar
+          </button>
+
+          <button type="submit" name="action" value="REJECT" class="btn btn-secondary btn-sm" style="color: #b91c1c; border-color: #fca5a5;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Rejeitar
+          </button>
+        </form>
+
+      </div>
+    {% empty %}
+      <div class="card" style="text-align: center; padding: 3rem;">
+        <p>Nenhum comentário encontrado para o filtro selecionado.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

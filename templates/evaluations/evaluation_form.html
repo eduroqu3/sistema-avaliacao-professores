@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Avaliar Docente - {{ offering.teacher.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px;">
+
+  <!-- Offering Header Card -->
+  <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--accent-senai);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <span class="badge badge-info">{{ offering.class_group.name }}</span>
+          <span class="mono" style="font-size: 0.8125rem; color: #64748b;">{{ offering.discipline.code }}</span>
+        </div>
+        <h1 style="font-size: 1.75rem; margin-bottom: 0.35rem;">
+          {{ offering.discipline.name }}
+        </h1>
+        <div style="font-size: 1rem; color: #334155;">
+          <strong>Docente Avaliado(a):</strong> {{ offering.teacher.get_academic_title_display }} {{ offering.teacher.user.get_full_name }}
+        </div>
+      </div>
+
+      <!-- Live Average Badge -->
+      <div style="text-align: center; background: #0f172a; color: #ffffff; padding: 1rem 1.5rem; border-radius: var(--radius-md);">
+        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Sua Nota Média</div>
+        <div id="live-average-score" style="font-size: 2.25rem; font-weight: 800; line-height: 1.1; color: #f8fafc;">
+          --
+        </div>
+        <div style="font-size: 0.6875rem; color: #94a3b8;">Escala de 1 a 5</div>
+      </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+      <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem;">
+        <span id="eval-progress-text">0 de {{ total_criteria }} respondidas (0%)</span>
+        <span class="mono" style="color: #64748b;">Protocolo Zero-Link</span>
+      </div>
+      <div style="height: 8px; width: 100%; background: #e2e8f0; border-radius: 9999px; overflow: hidden;">
+        <div id="eval-progress-fill" style="height: 100%; width: 0%; background: var(--accent-senai); transition: width 0.3s ease;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Evaluation Form -->
+  <form method="post" id="evaluation-form">
+    {% csrf_token %}
+
+    <!-- Dimensions & Criteria Loop -->
+    {% for dimension in dimensions %}
+      <div class="card" style="margin-bottom: 1.75rem;">
+        <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+          <div>
+            <span class="badge badge-neutral">Dimensão {{ dimension.order }}</span>
+            <h3 style="font-size: 1.25rem; margin-top: 0.25rem;">{{ dimension.name }}</h3>
+          </div>
+          {% if dimension.description %}
+            <span style="font-size: 0.8125rem; color: #64748b;">{{ dimension.description }}</span>
+          {% endif %}
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.75rem; margin-top: 1.25rem;">
+          {% for criterion in dimension.criteria.all %}
+            <div class="criterion-item" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              
+              <div>
+                <label style="font-weight: 600; font-size: 0.9375rem; color: #09090b; display: block;">
+                  {{ forloop.parentloop.counter }}.{{ forloop.counter }} - {{ criterion.title }}
+                </label>
+                {% if criterion.help_text %}
+                  <span style="font-size: 0.8125rem; color: #64748b;">{{ criterion.help_text }}</span>
+                {% endif %}
+              </div>
+
+              <!-- Likert 1 to 5 Rating Options -->
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; background: var(--bg-muted); padding: 0.75rem 1rem; border-radius: var(--radius-md);">
+                <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">1 - Muito Insatisfatório</span>
+                
+                <div class="rating-group">
+                  {% for score_val in "12345"|make_list %}
+                    <label class="rating-option" title="Nota {{ score_val }}">
+                      <input type="radio" name="criterion_{{ criterion.id }}" value="{{ score_val }}" required>
+                      <span class="rating-label">{{ score_val }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+
+                <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">5 - Excelente</span>
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    {% endfor %}
+
+    <!-- Qualitative Feedback Card -->
+    <div class="card" style="margin-bottom: 2rem;">
+      <div class="card-header">
+        <div>
+          <span class="badge badge-info">Comentário Opcional</span>
+          <h3 style="font-size: 1.25rem; margin-top: 0.25rem;">Feedback Construtivo e Sugestões</h3>
+        </div>
+      </div>
+
+      <p style="font-size: 0.875rem; margin-bottom: 1rem;">
+        Espaço aberto para observações detalhadas sobre didática, ritmo de aula, laboratórios e sugestões de melhoria.
+      </p>
+
+      <div class="form-group">
+        <textarea name="comment" rows="4" class="form-control" placeholder="Escreva seu feedback aqui... (opcional)"></textarea>
+      </div>
+
+      <div class="alert alert-warning" style="margin-bottom: 0; font-size: 0.8125rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div>
+          <strong>Diretrizes de Convivência:</strong> Os comentários passam por moderação pedagógica da coordenação do SENAI para evitar termos ofensivos ou ataques pessoais antes de serem disponibilizados no painel do docente.
+        </div>
+      </div>
+    </div>
+
+    <!-- Anonymity Confirmation & Submit Button -->
+    <div class="card" style="background: #0f172a; color: #ffffff; text-align: center; padding: 2rem;">
+      <h3 style="color: #ffffff; font-size: 1.35rem; margin-bottom: 0.5rem;">Pronto para registrar sua avaliação?</h3>
+      <p style="color: #cbd5e1; font-size: 0.9375rem; margin: 0 auto 1.5rem; max-width: 60ch;">
+        Ao clicar em "Confirmar Envio", suas respostas serão desacopladas criptograficamente da sua identidade e gravadas de forma anônima no banco de dados Supabase.
+      </p>
+      
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="{% url 'evaluations:student_list' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-senai btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirmar e Enviar Avaliação Anônima
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

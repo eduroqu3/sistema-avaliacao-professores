@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Anonymity Security Notice Banner -->
+  <div class="anonymity-shield">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.4); padding: 0.75rem; border-radius: 8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div style="font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+          Garantia Absoluta de Anonimato
+          <span class="anonymity-badge">Protocolo Zero-Link</span>
+        </div>
+        <div style="font-size: 0.875rem; color: #cbd5e1; margin-top: 0.25rem;">
+          Suas avaliações são fisicamente desacopladas da sua matrícula. Nem professores, nem a coordenação, nem os administradores do banco de dados conseguem rastrear suas respostas.
+        </div>
+      </div>
+    </div>
+    <div>
+      <a href="{% url 'core:about' %}" class="btn btn-secondary btn-sm" style="white-space: nowrap;">Como Funciona?</a>
+    </div>
+  </div>
+
+  <!-- Hero Section: Split-screen (Text Left, Visual Status Right) -->
+  <div class="grid-2" style="align-items: center; gap: 3rem; margin-bottom: 4rem;">
+    <div>
+      <span class="badge badge-neutral" style="margin-bottom: 1rem;">SENAI Morvan Figueiredo &bull; Ciclo 2025/1</span>
+      <h1 style="font-size: 2.75rem; margin-bottom: 1.25rem; line-height: 1.15;">
+        Transformando a qualidade pedagógica através da sua voz.
+      </h1>
+      <p style="font-size: 1.125rem; margin-bottom: 2rem; color: #475569;">
+        O <strong>Avalia SENAI</strong> é o canal institucional estruturado e seguro para você avaliar o desempenho dos docentes, identificar oportunidades de aprimoramento e construir uma formação técnica de excelência.
+      </p>
+
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        {% if user.is_authenticated %}
+          {% if user.is_student %}
+            <a href="{% url 'evaluations:student_list' %}" class="btn btn-senai btn-lg">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Responder Minhas Avaliações
+            </a>
+          {% elif user.is_teacher %}
+            <a href="{% url 'dashboards:teacher_dashboard' %}" class="btn btn-primary btn-lg">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Acessar Meu Dashboard
+            </a>
+          {% else %}
+            <a href="{% url 'dashboards:coordination_dashboard' %}" class="btn btn-primary btn-lg">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Painel Geral da Coordenação
+            </a>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Entrar com Matrícula / E-mail
+          </a>
+          <a href="{% url 'evaluations:anonymous_pin' %}" class="btn btn-secondary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Votar com PIN Anônimo
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Side: Cycle Status Card -->
+    <div>
+      <div class="card card-hover" style="border-top: 4px solid var(--accent-senai);">
+        <div class="card-header">
+          <div>
+            <span class="badge badge-success">Ciclo Vigente</span>
+            <h3 style="margin-top: 0.5rem;">{{ active_cycle.title|default:"Avaliação Docente 2025/1" }}</h3>
+          </div>
+          <div class="mono" style="font-weight: 700; font-size: 1.125rem; color: #475569;">
+            {{ active_cycle.academic_period|default:"2025/1" }}
+          </div>
+        </div>
+
+        <p style="font-size: 0.9375rem; margin-bottom: 1.5rem;">
+          {{ active_cycle.description|default:"Ciclo institucional de coleta de feedback aberto para os alunos da turma 2025_DEV4_SESI." }}
+        </p>
+
+        <!-- KPI Metrics Grid -->
+        <div class="grid-3" style="margin-bottom: 1.5rem; text-align: center;">
+          <div style="background: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+            <div style="font-size: 1.75rem; font-weight: 800; color: #09090b;">{{ total_responses|default:"30" }}</div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Respostas Coletadas</div>
+          </div>
+          <div style="background: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+            <div style="font-size: 1.75rem; font-weight: 800; color: #16a34a;">{{ overall_average|default:"4.6" }}</div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Índice Médio Geral</div>
+          </div>
+          <div style="background: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+            <div style="font-size: 1.75rem; font-weight: 800; color: #09090b;">100%</div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Sigilo Garantido</div>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 1rem; border-radius: var(--radius-md); font-size: 0.8125rem; color: #475569;">
+          <strong>Período de Votação:</strong> De {{ active_cycle.start_date|date:"d/m/Y" }} até {{ active_cycle.end_date|date:"d/m/Y" }}<br>
+          <strong>Turma Participante:</strong> 2025_DEV4_SESI (Técnico em Desenvolvimento de Sistemas)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Role Quick Selection Cards -->
+  <div style="margin-bottom: 4rem;">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+      <h2 style="font-size: 2rem;">Acesso aos Módulos do Sistema</h2>
+      <p style="margin: 0.5rem auto 0; max-width: 60ch;">
+        Selecione o seu perfil para navegar pelo ecossistema do Avalia SENAI.
+      </p>
+    </div>
+
+    <div class="grid-4">
+      <!-- Card Aluno -->
+      <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="width: 44px; height: 44px; border-radius: 8px; background: #e0f2fe; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Portal do Estudante</h3>
+          <p style="font-size: 0.875rem; margin-bottom: 1.5rem;">
+            Acesse as disciplinas da sua turma, responda aos questionários e receba seu comprovante anônimo de conclusão.
+          </p>
+        </div>
+        <a href="{% url 'accounts:demo_switch' 'eduardo' %}" class="btn btn-secondary btn-sm" style="width: 100%;">
+          Entrar como Aluno
+        </a>
+      </div>
+
+      <!-- Card Professor -->
+      <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="width: 44px; height: 44px; border-radius: 8px; background: #fef3c7; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+          </div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Portal do Docente</h3>
+          <p style="font-size: 0.875rem; margin-bottom: 1.5rem;">
+            Visualize o radar de competências didáticas, média das turmas e feedbacks construtivos aprovados pela coordenação.
+          </p>
+        </div>
+        <a href="{% url 'accounts:demo_switch' 'johnny' %}" class="btn btn-secondary btn-sm" style="width: 100%;">
+          Entrar como Prof. Johnny
+        </a>
+      </div>
+
+      <!-- Card Coordenação -->
+      <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="width: 44px; height: 44px; border-radius: 8px; background: #dcfce7; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          </div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Coordenação Pedagógica</h3>
+          <p style="font-size: 0.875rem; margin-bottom: 1.5rem;">
+            Painel gerencial com comparações entre docentes, evolução temporal, fila de moderação de comentários e relatórios.
+          </p>
+        </div>
+        <a href="{% url 'accounts:demo_switch' 'coordenacao' %}" class="btn btn-secondary btn-sm" style="width: 100%;">
+          Entrar como Coordenação
+        </a>
+      </div>
+
+      <!-- Card Votação Direta por PIN -->
+      <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between; border-color: #cbd5e1;">
+        <div>
+          <div style="width: 44px; height: 44px; border-radius: 8px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">PIN / Token de Laboratório</h3>
+          <p style="font-size: 0.875rem; margin-bottom: 1.5rem;">
+            Votação rápida sem necessidade de login. Ideal para sessões de avaliação coletiva nas bancadas de informática do SENAI.
+          </p>
+        </div>
+        <a href="{% url 'evaluations:anonymous_pin' %}" class="btn btn-senai btn-sm" style="width: 100%;">
+          Digitar PIN de Acesso
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pedagogical Dimensions Section -->
+  <div class="card" style="margin-bottom: 4rem;">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-info">Matriz de Avaliação SENAI</span>
+        <h2 style="margin-top: 0.5rem; font-size: 1.5rem;">Dimensões Pedagógicas Avaliadas</h2>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      {% for dim in dimensions %}
+        <div style="border-left: 3px solid var(--accent-primary); padding-left: 1rem;">
+          <h4 style="font-size: 1.05rem; margin-bottom: 0.25rem;">{{ dim.order }}. {{ dim.name }}</h4>
+          <p style="font-size: 0.8125rem; color: #64748b;">{{ dim.description }}</p>
+        </div>
+      {% empty %}
+        <div>Didática e Metodologia</div>
+        <div>Domínio Tecnológico e Prático</div>
+        <div>Pontualidade e Organização</div>
+        <div>Relacionamento Interpessoal</div>
+        <div>Critérios de Avaliação e Feedback</div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

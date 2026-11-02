@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Minhas Avaliações{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Header -->
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+    <div>
+      <span class="badge badge-info">Turma: {{ class_group.name|default:"2025_DEV4_SESI" }}</span>
+      <h1 style="margin-top: 0.5rem; font-size: 2rem;">Minhas Avaliações Docentes</h1>
+      <p style="color: #64748b; font-size: 0.9375rem;">
+        Ciclo Vigente: <strong>{{ active_cycle.title }}</strong> (Término em {{ active_cycle.end_date|date:"d/m/Y" }})
+      </p>
+    </div>
+    
+    <div style="text-align: right;">
+      <span class="badge {% if pending_count == 0 %}badge-success{% else %}badge-warning{% endif %}" style="font-size: 0.875rem; padding: 0.4rem 0.8rem;">
+        {% if pending_count == 0 %}
+          Todas as avaliações concluídas!
+        {% else %}
+          {{ pending_count }} de {{ total_offerings }} avaliações pendentes
+        {% endif %}
+      </span>
+    </div>
+  </div>
+
+  <!-- Anonymity Banner -->
+  <div class="alert alert-info">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <div>
+      <strong>Lembrete de Privacidade Institucional:</strong> Ao clicar em "Avaliar Docente", o sistema gerará um recibo criptográfico desacoplado. O professor não terá acesso a quem avaliou, apenas às médias e estatísticas agregadas.
+    </div>
+  </div>
+
+  <!-- Offerings Cards Grid -->
+  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    {% for item in offerings_data %}
+      <div class="card card-hover" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; border-left: 4px solid {% if item.is_completed %}#16a34a{% else %}#dc2626{% endif %};">
+        
+        <div style="flex: 1; min-width: 280px;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+            <span class="mono" style="font-size: 0.75rem; color: #64748b; background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px;">{{ item.offering.discipline.code }}</span>
+            <span style="font-size: 0.8125rem; color: #64748b;">{{ item.offering.discipline.workload_hours }} horas aula</span>
+          </div>
+          
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">
+            {{ item.offering.discipline.name }}
+          </h3>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9375rem; color: #334155;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+            <strong>Docente:</strong> {{ item.offering.teacher.user.get_full_name }} ({{ item.offering.teacher.get_academic_title_display }})
+          </div>
+        </div>
+
+        <!-- Action / Status -->
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+          {% if item.is_completed %}
+            <div style="text-align: right;">
+              <span class="badge badge-success" style="margin-bottom: 0.25rem;">Avaliação Concluída</span>
+              <div class="mono" style="font-size: 0.75rem; color: #64748b;">{{ item.receipt.completed_at|date:"d/m/Y H:i" }}</div>
+            </div>
+            <a href="{% url 'evaluations:receipt_view' item.receipt.receipt_hash %}" class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Ver Comprovante
+            </a>
+          {% else %}
+            <div>
+              <span class="badge badge-warning">Pendente</span>
+            </div>
+            <a href="{% url 'evaluations:evaluate_form' item.offering.id %}" class="btn btn-senai">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Avaliar Docente
+            </a>
+          {% endif %}
+        </div>
+
+      </div>
+    {% empty %}
+      <div class="card" style="text-align: center; padding: 3rem;">
+        <p>Nenhuma disciplina encontrada para sua turma no ciclo vigente.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

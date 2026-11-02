@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Comprovante de Participação{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 680px; margin: 2rem auto;">
+
+  <!-- Receipt Container Card -->
+  <div class="card" style="box-shadow: var(--shadow-hover); border-top: 6px solid #16a34a; padding: 2.5rem;">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="brand-badge">ESCOLA SENAI MORVAN FIGUEIREDO</span>
+      <h2 style="font-size: 1.75rem; margin-top: 0.75rem;">Comprovante de Avaliação Docente</h2>
+      <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.25rem;">
+        Autenticação Criptográfica de Cumprimento Acadêmico
+      </p>
+    </div>
+
+    <!-- Receipt Details Table -->
+    <div style="background: var(--bg-muted); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1rem; font-size: 0.9375rem;">
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+        <span style="color: #64748b;">Turma / Curso:</span>
+        <strong style="color: #09090b;">{{ receipt.offering.class_group.name }} &bull; {{ receipt.offering.class_group.course.name }}</strong>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+        <span style="color: #64748b;">Unidade Curricular:</span>
+        <strong style="color: #09090b;">{{ receipt.offering.discipline.name }}</strong>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+        <span style="color: #64748b;">Docente Avaliado:</span>
+        <strong style="color: #09090b;">{{ receipt.offering.teacher.user.get_full_name }}</strong>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+        <span style="color: #64748b;">Ciclo de Avaliação:</span>
+        <strong>{{ receipt.cycle.title }}</strong>
+      </div>
+
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #64748b;">Data e Hora do Envio:</span>
+        <strong class="mono">{{ receipt.completed_at|date:"d/m/Y H:i:s" }}</strong>
+      </div>
+    </div>
+
+    <!-- Cryptographic Hash Box -->
+    <div style="margin-bottom: 2rem;">
+      <label class="form-label" style="font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">
+        Código Hash SHA-256 do Recibo:
+      </label>
+      <div style="display: flex; gap: 0.5rem;">
+        <input type="text" class="form-control mono" value="{{ receipt.receipt_hash }}" readonly style="background: #ffffff; font-size: 0.8125rem;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="copyToClipboard('{{ receipt.receipt_hash }}', this)">
+          Copiar
+        </button>
+      </div>
+      <span style="font-size: 0.75rem; color: #64748b; margin-top: 0.35rem; display: block;">
+        Este hash comprova matematicamente que você realizou a avaliação sem revelar qualquer voto ou nota.
+      </span>
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+      <a href="{% url 'evaluations:student_list' %}" class="btn btn-secondary">
+        &larr; Voltar para Minhas Avaliações
+      </a>
+      <button type="button" class="btn btn-primary" onclick="window.print()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir Comprovante
+      </button>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

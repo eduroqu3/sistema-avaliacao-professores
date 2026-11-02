@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Vínculos docentes · Avalia SENAI{% endblock %}
+{% block content %}
+<section class="page">
+  <div class="page-header"><div><div class="eyebrow">Coordenação</div><h1>Vínculos docentes</h1><p>Associe cada professor a uma disciplina e turma para disponibilizá-los no formulário público de avaliação.</p></div><a class="button" href="{% url 'assignment_create' %}">+ Novo vínculo</a></div>
+  <div class="table-wrap"><table><thead><tr><th>Professor</th><th>Disciplina</th><th>Turma</th><th>Período</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+  {% for item in assignments %}<tr><td><strong>{{ item.teacher.name }}</strong></td><td>{{ item.subject.name }}</td><td>{{ item.class_name|default:"—" }}</td><td>{{ item.period|default:"—" }}</td><td>{% if item.active and item.teacher.active and item.subject.active %}<span class="status">Disponível</span>{% else %}<span class="pill">Indisponível</span>{% endif %}</td><td><div class="table-actions"><a class="button secondary small" href="{% url 'assignment_edit' item.pk %}">Editar</a><form method="post" action="{% url 'assignment_delete' item.pk %}" onsubmit="return confirm('Excluir ou desativar este vínculo?')">{% csrf_token %}<button class="button danger small" type="submit">Excluir</button></form></div></td></tr>
+  {% empty %}<tr><td colspan="6" class="empty">Nenhum vínculo cadastrado. Crie um para disponibilizar professores e disciplinas na avaliação.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

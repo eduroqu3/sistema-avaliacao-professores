@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel da Coordenação Pedagógica{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Header Card -->
+  <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--accent-senai);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+      <div>
+        <span class="badge badge-success">Gestão Pedagógica &bull; SENAI Morvan Figueiredo</span>
+        <h1 style="font-size: 2rem; margin-top: 0.35rem;">Painel Geral da Coordenação</h1>
+        <p style="font-size: 0.9375rem; color: #64748b; margin-top: 0.25rem;">
+          Métricas consolidadas do ciclo <strong>{{ active_cycle.title }}</strong> &bull; Período {{ active_cycle.academic_period }}
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'dashboards:moderation' %}" class="btn btn-secondary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Moderação de Feedbacks
+          {% if pending_moderation_count > 0 %}
+            <span class="badge badge-danger" style="margin-left: 0.35rem; font-size: 0.7rem;">{{ pending_moderation_count }}</span>
+          {% endif %}
+        </a>
+
+        <a href="{% url 'reports:export_excel' active_cycle.id %}" class="btn btn-primary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar Excel (.xlsx)
+        </a>
+
+        <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Relatórios
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="grid-4" style="margin-bottom: 2.5rem;">
+    <div class="card" style="text-align: center;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Média Geral da Escola</div>
+      <div style="font-size: 2.25rem; font-weight: 800; color: #16a34a; margin: 0.25rem 0;">
+        {{ overall_school_avg|floatformat:2 }}
+      </div>
+      <div style="font-size: 0.75rem; color: #16a34a; font-weight: 600;">Meta Institucional (> 4.0)</div>
+    </div>
+
+    <div class="card" style="text-align: center;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Total de Avaliações</div>
+      <div style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin: 0.25rem 0;">
+        {{ total_evaluations_count }}
+      </div>
+      <div style="font-size: 0.75rem; color: #64748b;">Submissões Coletadas</div>
+    </div>
+
+    <div class="card" style="text-align: center;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Docentes Avaliados</div>
+      <div style="font-size: 2.25rem; font-weight: 800; color: #0284c7; margin: 0.25rem 0;">
+        {{ teachers_data|length }}
+      </div>
+      <div style="font-size: 0.75rem; color: #64748b;">Corpo Docente Ativo</div>
+    </div>
+
+    <div class="card" style="text-align: center;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Fila de Moderação</div>
+      <div style="font-size: 2.25rem; font-weight: 800; color: {% if pending_moderation_count > 0 %}#dc2626{% else %}#16a34a{% endif %}; margin: 0.25rem 0;">
+        {{ pending_moderation_count }}
+      </div>
+      <div style="font-size: 0.75rem; color: #64748b;">Comentários Pendentes</div>
+    </div>
+  </div>
+
+  <!-- Comparative Horizontal Bar Chart (Chart.js) -->
+  <div class="card" style="margin-bottom: 2.5rem;">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-neutral">Analytics Comparativo</span>
+        <h3 style="font-size: 1.25rem; margin-top: 0.25rem;">Índice Médio de Satisfação por Docente</h3>
+      </div>
+      <span style="font-size: 0.8125rem; color: #64748b;">Escala de 1.0 a 5.0</span>
+    </div>
+    
+    <div style="position: relative; height: 260px;">
+      <canvas id="coordinationComparisonChart" 
+              data-teachers='{{ comparison_teachers_json|safe }}' 
+              data-averages='{{ comparison_averages_json|safe }}'></canvas>
+    </div>
+  </div>
+
+  <!-- Teachers Ranking Table -->
+  <div class="card" style="margin-bottom: 2.5rem;">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-info">Quadro Docente</span>
+        <h3 style="font-size: 1.25rem; margin-top: 0.25rem;">Desempenho Geral e Atribuições</h3>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Posição</th>
+            <th>Docente</th>
+            <th>Departamento</th>
+            <th>Unidade Curricular / Turma</th>
+            <th>Qtd. Avaliações</th>
+            <th>Média Geral</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in teachers_data %}
+            <tr>
+              <td>
+                <span class="mono" style="font-weight: 700; font-size: 1rem; color: #09090b;">#{{ forloop.counter }}</span>
+              </td>
+              <td>
+                <div style="font-weight: 700; color: #09090b;">{{ t.profile.user.get_full_name }}</div>
+                <div style="font-size: 0.75rem; color: #64748b;">{{ t.profile.get_academic_title_display }} &bull; {{ t.profile.user.registration_number }}</div>
+              </td>
+              <td>{{ t.profile.department }}</td>
+              <td>
+                {% for off in t.offerings %}
+                  <div style="font-size: 0.8125rem;">
+                    <strong>{{ off.discipline.name }}</strong> ({{ off.class_group.name }})
+                  </div>
+                {% empty %}
+                  <span style="color: #94a3b8;">Sem oferta ativa</span>
+                {% endfor %}
+              </td>
+              <td class="mono" style="font-weight: 600;">{{ t.response_count }}</td>
+              <td>
+                <span class="mono" style="font-weight: 800; font-size: 1.15rem; color: {% if t.average_score >= 4.5 %}#16a34a{% elif t.average_score >= 4.0 %}#2563eb{% else %}#eab308{% endif %};">
+                  {{ t.average_score|floatformat:2 }}
+                </span>
+                <span style="font-size: 0.75rem; color: #64748b;">/ 5.0</span>
+              </td>
+              <td>
+                <a href="{% url 'dashboards:teacher_detail' t.profile.id %}" class="btn btn-secondary btn-sm">
+                  Ver Dashboard
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" style="text-align: center; color: #64748b;">Nenhum docente cadastrado com avaliações no ciclo.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
